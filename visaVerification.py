@@ -90,13 +90,23 @@ class TestVisaVerification:
         )
         # time.sleep(2)
         # 9 | click | id=appointments_asc_appointment_facility_id |
+        # This is already selected
         # self.driver.find_element(By.ID, "appointments_asc_appointment_facility_id").click()
         # self.driver.find_element(By.ID, "appointments_consulate_appointment_facility_id").click()
+        time.sleep(5)
+        # 9.b | click | id=consulate_date_time_not_available | It seems to be a problem with the page
+        elements = self.driver.find_elements(by=By.ID, value="consulate_date_time_not_available")
+
+        if len(elements) > 0:
+            print("No appointments in starting date. Issue with the page")
+            
+            raise Exception("No appointments in starting date. Issue with the page")
+        
         # 10 | click | id=appointments_asc_appointment_date |
         # self.driver.find_element(By.ID, "appointments_asc_appointment_date").click()
-        time.sleep(5)
+        
         self.driver.find_element(
-            By.ID, "appointments_consulate_appointment_date"
+            By.ID, "appointments_consulate_appointmenselenium.common.exceptions.ElementNotInteractableException:t_date"
         ).click()
 
         element = None
@@ -125,7 +135,7 @@ class TestVisaVerification:
         #         dropdown.find_element(By.XPATH, "//option[. = '09:45']").click()
         # Don't find the index
         # dropdown.select_by_index(0).click()
-
+        print("appointments_consulate_appointment_time")
         selected_time = None
         times = [
             "08:00",
@@ -134,6 +144,7 @@ class TestVisaVerification:
             "09:30",
             "10:00",
             "10:30",
+            "11:00",
         ]
         i = 0
         while selected_time is None:
@@ -146,7 +157,10 @@ class TestVisaVerification:
                 print("handling specific exception - attribute error")
                 print(error)
             # except NoSuchElementException as error:
-
+            except IndexError as error:
+                print(error)
+                print(f"exeption class: {type(error)}")
+                break
             except Exception as error:
                 print(error)
                 print(f"exeption class: {type(error)}")
@@ -155,8 +169,69 @@ class TestVisaVerification:
 
         # If there is no second appointment available (id = "asc_date_time_not_available")
         #   Return, and find next (put min_date, max_date)
-        if self.driver.find_element(By.ID, "asc_date_time_not_available").isEmpty():
+        if len(self.driver.find_elements(By.ID, "asc_date_time_not_available")) > 0:
             print("No appointments with this date")
+
+        else:
+            # 1x | click | id=appointments_asc_appointment_date |
+            # self.driver.find_element(By.ID, "appointments_asc_appointment_date").click()
+            time.sleep(5)
+            self.driver.find_element(By.ID, "appointments_asc_appointment_date").click()
+
+            element = None
+            while element == None:
+                element = "found"
+                try:
+                    # 11 | click | css=.ui-icon-circle-triangle-e |
+                    self.driver.find_element(
+                        By.CSS_SELECTOR, ".ui-icon-circle-triangle-e"
+                    ).click()
+                    # 12 | click | xpath=//td[@data-handler='selectDay']/a |
+                    self.driver.find_element(
+                        By.XPATH, "//td[@data-handler='selectDay']/a"
+                    ).click()
+                except Exception:
+                    # TODO: Check exception
+                    element = None
+
+            # 13 | click | id=appointments_asc_appointment_time |
+            self.driver.find_element(By.ID, "asc-appointment-fields").click()
+
+            # 14 | select | id=appointments_asc_appointment_time | label=09:45
+            dropdown = Select(
+                self.driver.find_element(By.ID, "appointments_asc_appointment_time")
+            )
+            #         dropdown.find_element(By.XPATH, "//option[. = '09:45']").click()
+            # Don't find the index
+            # dropdown.select_by_index(0).click()
+
+            print("appointments_asc_appointment_time")
+            selected_time = None
+            times = [
+                "08:00",
+            ]
+            for hora in range(7, 15):
+                for minutos in ["00", "15", "30", "45"]:
+                    times.append(f"{str(hora)}:{minutos}")
+                    print(times[-1])
+            # range(7,15):["00","15","30","45"]
+            i = 0
+            while selected_time is None:
+                selected_time = "true"
+                try:
+                    print(f"times['i'] > {times[i]}")
+                    dropdown.select_by_value(times[i])
+                    # dropdown.select_by_value(times[i]).click()
+                except AttributeError as error:
+                    print("handling specific exception - attribute error")
+                    print(error)
+                # except NoSuchElementException as error:
+
+                except Exception as error:
+                    print(error)
+                    print(f"exeption class: {type(error)}")
+                    selected_time = None
+                    i += 1
 
         print("fin")
         # If there is appointment
@@ -166,7 +241,7 @@ class TestVisaVerification:
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         """Quit driver"""
-        # self.driver.quit()
+        self.driver.quit()
 
 
 if __name__ == "__main__":
