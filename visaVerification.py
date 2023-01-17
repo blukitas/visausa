@@ -184,76 +184,82 @@ class TestVisaVerification:
         # Check if message is there
         # print("len(self.driver.find_elements(By.ID, 'asc_date_time_not_available'))")
         # print(len(self.driver.find_elements(By.ID, "asc_date_time_not_available")))
-
-        if len(self.driver.find_elements(By.ID, "asc_date_time_not_available")) > 0:
-            print("No appointments with this date")
+        error_messages =self.driver.find_elements(By.ID, "asc_date_time_not_available")
+        if len(error_messages) > 0:
+            print(f'error_messages[0].get_attribute("display") {error_messages[0].get_attribute("display")}')
+            if error_messages[0].get_attribute("display") != "None":
+                # FIX: Is not working proper
+                print("No appointments with this date")
             # Raise exception? Or try again?
             # Finish?
 
-        else:
+    
+        # 1x | click | id=appointments_asc_appointment_date |
+        # self.driver.find_element(By.ID, "appointments_asc_appointment_date").click()
+        time.sleep(5)
+        self.driver.find_element(By.ID, "appointments_asc_appointment_date").click()
 
-            # 1x | click | id=appointments_asc_appointment_date |
-            # self.driver.find_element(By.ID, "appointments_asc_appointment_date").click()
-            time.sleep(5)
-            self.driver.find_element(By.ID, "appointments_asc_appointment_date").click()
+        element = None
+        while element == None:
+            element = "found"
+            try:
+                # 11 | click | css=.ui-icon-circle-triangle-e |
+                self.driver.find_element(
+                    By.CSS_SELECTOR, ".ui-icon-circle-triangle-e"
+                ).click()
+                # 12 | click | xpath=//td[@data-handler='selectDay']/a |
+                self.driver.find_element(
+                    By.XPATH, "//td[@data-handler='selectDay']/a"
+                ).click()
+            except Exception:
+                # TODO: Check exception
+                element = None
 
-            element = None
-            while element == None:
-                element = "found"
-                try:
-                    # 11 | click | css=.ui-icon-circle-triangle-e |
-                    self.driver.find_element(
-                        By.CSS_SELECTOR, ".ui-icon-circle-triangle-e"
-                    ).click()
-                    # 12 | click | xpath=//td[@data-handler='selectDay']/a |
-                    self.driver.find_element(
-                        By.XPATH, "//td[@data-handler='selectDay']/a"
-                    ).click()
-                except Exception:
-                    # TODO: Check exception
-                    element = None
+        # 13 | click | id=appointments_asc_appointment_time |
+        # self.driver.find_element(By.ID, "asc-appointment-fields").click()
 
-            # 13 | click | id=appointments_asc_appointment_time |
-            self.driver.find_element(By.ID, "asc-appointment-fields").click()
+        # 14 | select | id=appointments_asc_appointment_time | label=09:45
+        dropdown = Select(
+            self.driver.find_element(By.ID, "appointments_asc_appointment_time")
+        )
+        #         dropdown.find_element(By.XPATH, "//option[. = '09:45']").click()
+        # Don't find the index
+        # dropdown.select_by_index(0).click()
 
-            # 14 | select | id=appointments_asc_appointment_time | label=09:45
-            dropdown = Select(
-                self.driver.find_element(By.ID, "appointments_asc_appointment_time")
-            )
-            #         dropdown.find_element(By.XPATH, "//option[. = '09:45']").click()
-            # Don't find the index
-            # dropdown.select_by_index(0).click()
+        # print("appointments_asc_appointment_time")
+        selected_time = None
+        times = []
+        for hora in range(7, 15):
+            for minutos in ["00", "15", "30", "45"]:
+                times.append(f"{str(hora)}:{minutos}")
+                # print(times[-1])
 
-            print("appointments_asc_appointment_time")
-            selected_time = None
-            times = []
-            for hora in range(7, 15):
-                for minutos in ["00", "15", "30", "45"]:
-                    times.append(f"{str(hora)}:{minutos}")
-                    print(times[-1])
-            i = 0
-            while selected_time is None:
-                selected_time = "true"
-                try:
-                    print(f"times['i'] > {times[i]}")
-                    dropdown.select_by_value(times[i])
-                    # dropdown.select_by_value(times[i]).click()
-                except AttributeError as error:
-                    print("handling specific exception - attribute error")
-                    print(error)
-                # except NoSuchElementException as error:
+        i = 0
+        while selected_time is None:
+            selected_time = "true"
+            try:
+                print(f"times['i'] > {times[i]}")
+                dropdown.select_by_value(times[i])
+                # dropdown.select_by_value(times[i]).click()
+            except AttributeError as error:
+                print("handling specific exception - attribute error")
+                print(error)
+            # except NoSuchElementException as error:
 
-                except Exception as error:
-                    print(error)
-                    print(f"exeption class: {type(error)}")
-                    selected_time = None
-                    i += 1
+            except Exception as error:
+                print(error)
+                print(f"exeption class: {type(error)}")
+                selected_time = None
+                i += 1
 
-        print("fin")
         # If there is appointment
         # Second dropdown: appointments_asc_appointment_date (2do combo)
         #                  appointments_consulate_appointment_date (1er combo)
         # Same code, check date, check hour
+
+        # If all good, click: 'appointments_submit'
+        print("fin")
+
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         """Quit driver"""
