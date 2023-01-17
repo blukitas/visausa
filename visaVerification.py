@@ -22,6 +22,7 @@ class TestVisaVerification:
 
     user = None
     password = None
+    base_date = '2023-07-30'
 
     def __init__(self):
         self.config_user()
@@ -95,18 +96,21 @@ class TestVisaVerification:
         # self.driver.find_element(By.ID, "appointments_consulate_appointment_facility_id").click()
         time.sleep(5)
         # 9.b | click | id=consulate_date_time_not_available | It seems to be a problem with the page
-        elements = self.driver.find_elements(by=By.ID, value="consulate_date_time_not_available")
+        elements = self.driver.find_elements(
+            by=By.ID, value="consulate_date_time_not_available"
+        )
 
-        if len(elements) > 0:
+        if len(elements) < 1:
             print("No appointments in starting date. Issue with the page")
-            
+
             raise Exception("No appointments in starting date. Issue with the page")
-        
+
         # 10 | click | id=appointments_asc_appointment_date |
         # self.driver.find_element(By.ID, "appointments_asc_appointment_date").click()
-        
+
         self.driver.find_element(
-            By.ID, "appointments_consulate_appointmenselenium.common.exceptions.ElementNotInteractableException:t_date"
+            By.ID,
+            "appointments_consulate_appointment_date",
         ).click()
 
         element = None
@@ -169,10 +173,25 @@ class TestVisaVerification:
 
         # If there is no second appointment available (id = "asc_date_time_not_available")
         #   Return, and find next (put min_date, max_date)
+        
+        #  Check date -> appointments_consulate_appointment_date
+        print("appointments_consulate_appointment_date")
+        print(self.driver.find_element(By.ID, "appointments_consulate_appointment_date").get_attribute("value"))
+        if (self.driver.find_element(By.ID, "appointments_consulate_appointment_date").get_attribute("value")) < self.base_date:
+            print("NEWER DATE")
+        else:
+            print("OLDER DATE")
+        # Check if message is there
+        # print("len(self.driver.find_elements(By.ID, 'asc_date_time_not_available'))")
+        # print(len(self.driver.find_elements(By.ID, "asc_date_time_not_available")))
+
         if len(self.driver.find_elements(By.ID, "asc_date_time_not_available")) > 0:
             print("No appointments with this date")
+            # Raise exception? Or try again?
+            # Finish?
 
         else:
+
             # 1x | click | id=appointments_asc_appointment_date |
             # self.driver.find_element(By.ID, "appointments_asc_appointment_date").click()
             time.sleep(5)
@@ -207,14 +226,11 @@ class TestVisaVerification:
 
             print("appointments_asc_appointment_time")
             selected_time = None
-            times = [
-                "08:00",
-            ]
+            times = []
             for hora in range(7, 15):
                 for minutos in ["00", "15", "30", "45"]:
                     times.append(f"{str(hora)}:{minutos}")
                     print(times[-1])
-            # range(7,15):["00","15","30","45"]
             i = 0
             while selected_time is None:
                 selected_time = "true"
@@ -241,7 +257,7 @@ class TestVisaVerification:
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         """Quit driver"""
-        self.driver.quit()
+        # self.driver.quit()
 
 
 if __name__ == "__main__":
