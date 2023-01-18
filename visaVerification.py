@@ -186,8 +186,8 @@ class TestVisaVerification:
         # print(len(self.driver.find_elements(By.ID, "asc_date_time_not_available")))
         error_messages =self.driver.find_elements(By.ID, "asc_date_time_not_available")
         if len(error_messages) > 0:
-            print(f'error_messages[0].get_attribute("display") {error_messages[0].get_attribute("display")}')
-            if error_messages[0].get_attribute("display") != "None":
+            print(f'error_messages[0].value_of_css_property("display") {error_messages[0].value_of_css_property("display")}')
+            if error_messages[0].value_of_css_property("display") != "None":
                 # FIX: Is not working proper
                 print("No appointments with this date")
             # Raise exception? Or try again?
